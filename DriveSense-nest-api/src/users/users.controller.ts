@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -28,16 +28,26 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
+  @Roles(RolesEnum.ADMIN)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
   }
 
-  @Put(':id')
-  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
+ @Put(':id')
+@UseGuards(JwtAuthGuard)
+update(
+  @Req() req,
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: UpdateUserDto
+) {
+  const isAdmin = req.user.role === RolesEnum.ADMIN;
+  if (!isAdmin && req.user.id !== id) {
+    throw new ForbiddenException('No puedes actualizar otro usuario');
   }
+  delete dto.role; // solo admins pueden cambiar rol
+  return this.usersService.update(id, dto);
+}
+
 
   @Delete(':id')
   @Roles(RolesEnum.ADMIN)

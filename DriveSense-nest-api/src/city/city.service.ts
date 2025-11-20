@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,14 +13,23 @@ export class CityService {
     private readonly cityRepository: Repository<City>,
   ) {}
 
-  async create(createCityDto: CreateCityDto) {
-    const city = this.cityRepository.create(createCityDto);
+ async create(createCityDto: CreateCityDto) {
+  const city = this.cityRepository.create(createCityDto);
+
+  try {
     await this.cityRepository.save(city);
     return {
       message: 'City created successfully.',
       data: city,
     };
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw new BadRequestException(`La ciudad "${createCityDto.name}" ya existe`);
+    }
+    throw error; // relanza otros errores
   }
+}
+
 
   async findAll() {
     const cities = await this.cityRepository.find();
@@ -58,4 +67,3 @@ export class CityService {
 
 }
   
-

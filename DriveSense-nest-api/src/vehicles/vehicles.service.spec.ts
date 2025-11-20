@@ -7,18 +7,17 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { User } from '../users/entities/user.entity';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import { RolesEnum } from '../users/entities/user.entity'; // ASSUMPTION: RolesEnum import
+import { RolesEnum } from '../users/entities/user.entity'; 
 
 describe('VehiclesService', () => {
   let service: VehiclesService;
   let vehicleRepository: Repository<Vehicle>;
 
-  // FIX: Ensure mockUser matches the structure (assuming User entity uses RolesEnum)
   const mockUser: User = {
     id: 1,
     email: 'test@example.com',
     name: 'Test User',
-    role: RolesEnum.USER, // Use the correct Enum type
+    role: RolesEnum.USER, 
     createdAt: new Date(),
     updatedAt: new Date(),
   } as User;
@@ -61,7 +60,7 @@ describe('VehiclesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks(); // Important for restoring spied methods
+    jest.restoreAllMocks(); 
   });
 
   describe('create', () => {
@@ -83,7 +82,7 @@ describe('VehiclesService', () => {
       expect(vehicleRepository.findOne).toHaveBeenCalledWith({
         where: { licensePlate: createVehicleDto.licensePlate }
       });
-      // FIX: Use expect.objectContaining for clarity and safety in 'create' call
+     
       expect(vehicleRepository.create).toHaveBeenCalledWith(expect.objectContaining({
         ...createVehicleDto,
         user: mockUser

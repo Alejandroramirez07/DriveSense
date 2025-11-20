@@ -13,7 +13,7 @@ describe('LoginDTO', () => {
     const errors = await validate(loginDTO);
 
     expect(errors.length).toBe(0);
-    expect(loginDTO.email).toBe('test@example.com'); // Should be transformed to lowercase
+    expect(loginDTO.email).toBe('test@example.com'); 
   });
 
   it('should fail validation with invalid email', async () => {
